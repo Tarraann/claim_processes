@@ -1,0 +1,73 @@
+version: '3.8'
+services:
+  backend:
+    volumes:
+      - "./:/app"
+    build:
+      dockerfile: Dockerfile
+      context: .
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - claims_network
+    ports:
+      - "8001:8001"
+    command: ["/app/wait-for-it.sh", "postgres:5432","-t","60","--","/app/entrypoint.sh"]
+
+# If you want to work on or need jobs
+
+  celery:
+    volumes:
+      - "./:/app"
+    build:
+      dockerfile: Dockerfile
+      context: .
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - claims_network
+    deploy:
+      replicas: 1
+    command: ["/app/entrypoint_celery.sh"]
+
+  celery_scheduler:
+    volumes:
+      - "./:/app"
+    build: .
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - claims_network
+    command: [ "/app/entrypoint_celery_scheduler.sh" ]
+
+
+  redis:
+    image: "redis/redis-stack-server:latest"
+    networks:
+      - claims_network
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+  postgres:
+    image: "docker.io/library/postgres:15"
+    environment:
+      - POSTGRES_USER=claims
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_DB=claims
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    networks:
+      - claims_network
+    ports:
+      - "5434:5432"
+networks:
+  claims_network:
+    driver: bridge
+volumes:
+  postgres_data:
+  redis_data:
