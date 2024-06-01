@@ -32,8 +32,8 @@ pyasn1==0.5.1
 pyasn1-modules==0.3.0
 rsa==4.9
 json5==0.9.14
-PyYAML~=6.0.1
-celery~=5.3.6
+PyYAML==6.0.1
+celery==5.3.6
 sendgrid==6.11.0
 rich==13.7.0
 asgi-correlation-id[celery]==4.3.0

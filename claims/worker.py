@@ -46,20 +46,7 @@ def create_session():
     return session
 
 
-celery_app.conf.beat_schedule = {
-    "check-trial-period-end": {
-        "task": "billing.worker.check_trial_period_end",
-        "schedule": crontab(hour="0", minute="5"),
-    },
-    "check-grace-period": {
-        "task": "billing.worker.check_grace_period_end",
-        "schedule": timedelta(days=1),
-    },
-    "check-status-in-progress-payments": {
-        "task": "billing.worker.check_status_in_progress_payments",
-        "schedule": timedelta(minutes=10)
-    }
-}
+celery_app.conf.beat_schedule = {}
 
 load_correlation_ids()
 
