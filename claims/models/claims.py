@@ -42,3 +42,12 @@ class Claim(DBBaseModel):
         session.commit()
         session.refresh(claim)
         return claim
+
+    @classmethod
+    def get_top_net_fees_claims(cls, session: Session):
+        return (
+            session.query(Claim)
+            .order_by(Claim.net_fee)
+            .limit(10)
+            .all()
+        )

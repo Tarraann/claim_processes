@@ -1,5 +1,4 @@
-from datetime import datetime, timedelta
-
+from typing import List
 from sqlalchemy import Column, Integer, CheckConstraint
 from sqlalchemy.orm import Session
 from claims.models.base_model import DBBaseModel
@@ -26,3 +25,9 @@ class Provider(DBBaseModel):
             session.commit()
             session.refresh(provider)
         return provider
+
+    @classmethod
+    def get_providers_by_ids(cls, session: Session, provider_ids: List[int]):
+        return (
+            session.query(Provider).filter(Provider.id.in_(provider_ids)).all()
+        )
