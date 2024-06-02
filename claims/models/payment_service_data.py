@@ -1,5 +1,8 @@
 from sqlalchemy import Column, Integer, Float, String
 from sqlalchemy.orm import Session
+
+from claims.constants.notifying_status import NotifyingStatus
+from claims.lib.logger import logger
 from claims.models.base_model import DBBaseModel
 
 
@@ -19,3 +22,20 @@ class PaymentServiceData(DBBaseModel):
         )
         session.add(payment_service_data)
         session.commit()
+
+    @classmethod
+    def get_failed_notifying_status(cls, session: Session):
+        return (
+            session.query(PaymentServiceData)
+            .filter(PaymentServiceData.notifying_status == NotifyingStatus.FAILED.value)
+            .all()
+        )
+
+    @classmethod
+    def update_notifying_status(cls, session: Session, id: int, notifying_status: str):
+        data = session.query(PaymentServiceData).filter(PaymentServiceData.id == id).first()
+        if data is None:
+            logger.info("No data found in Payment Service Data table for the id: {}".format(id))
+            return
+        data.notifying_status = notifying_status
+        session.flush()

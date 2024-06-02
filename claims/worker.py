@@ -11,6 +11,7 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from claims.config.config import get_config
+from claims.jobs.retry_notifying_failed_status import retry_notifying_failed_status
 from claims.services.claim_service import ClaimService
 
 load_dotenv()
@@ -49,7 +50,12 @@ def create_session():
     return session
 
 
-celery_app.conf.beat_schedule = {}
+celery_app.conf.beat_schedule = {
+    'retry-for-payment-failed-status': {
+        'task': 'claims.worker.retry_for_failed_notifying_status',
+        'schedule': timedelta(hours=2),
+    },
+}
 
 load_correlation_ids()
 
@@ -74,3 +80,17 @@ def complex_task(n):
 @celery_app.task
 def notify_payments_service(payment_data: List):
     ClaimService(session=create_session()).notify_payment_service(payment_data=payment_data)
+
+
+@celery_app.task
+def retry_for_failed_notifying_status():
+    session = create_session()
+    try:
+        retry_notifying_failed_status(session=session)
+        session.commit()
+    except Exception as e:
+        session.rollback()
+        raise e
+    finally:
+        session.close()
+    return {'status': 'Task completed'}
