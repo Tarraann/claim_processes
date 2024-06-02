@@ -44,7 +44,7 @@ async def get_top_providers():
         top_net_fees_claims = Claim.get_top_net_fees_claims(session=session)
         provider_ids = [provider.id for provider in top_net_fees_claims]
         providers = Provider.get_providers_by_ids(session=session, provider_ids=provider_ids)
-        for provider, claim in providers, top_net_fees_claims:
+        for provider, claim in zip(providers, top_net_fees_claims):
             response.append(
                 GetTopProvidersResponse(
                     provider_id=provider.id,
