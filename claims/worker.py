@@ -1,6 +1,8 @@
 import os
 import time
 from datetime import timedelta
+from typing import List
+
 from asgi_correlation_id.extensions.celery import load_correlation_ids
 from celery import Celery
 from celery.signals import after_setup_logger
@@ -9,6 +11,7 @@ from dotenv import load_dotenv
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from claims.config.config import get_config
+from claims.services.claim_service import ClaimService
 
 load_dotenv()
 REDIS_URL = get_config("REDIS_URL")
@@ -67,3 +70,7 @@ def complex_task(n):
 
     return {"status": "Task completed", "result": result}
 
+
+@celery_app.task
+def notify_payments_service(payment_data: List):
+    ClaimService(session=create_session()).notify_payment_service(payment_data=payment_data)

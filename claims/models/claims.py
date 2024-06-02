@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import datetime
 
 from sqlalchemy import Column, Integer, String, DateTime, Float
 from sqlalchemy.orm import Session
@@ -20,3 +20,25 @@ class Claim(DBBaseModel):
     member_coinsurance = Column(Float, nullable=False, default=0)
     member_copay = Column(Float, nullable=False, default=0)
     net_fee = Column(Float, nullable=False, default=0)
+
+    @classmethod
+    def create_claim(cls, session: Session, service_date: datetime, quadrant: str, provider_id: int, procedure_id: int,
+                     plan_id: int, subscriber_id: int, provider_fees: float, allowed_fees: float, member_coinsurance: float,
+                     member_copay: float, net_fee: float):
+        claim = Claim(
+            service_date=service_date,
+            quadrant=quadrant,
+            provider_id=provider_id,
+            procedure_id=procedure_id,
+            plan_id=plan_id,
+            subscriber_id=subscriber_id,
+            provider_fees=provider_fees,
+            allowed_fees=allowed_fees,
+            member_coinsurance=member_coinsurance,
+            member_copay=member_copay,
+            net_fee=net_fee
+        )
+        session.add(claim)
+        session.commit()
+        session.refresh(claim)
+        return claim

@@ -16,3 +16,13 @@ class Procedure(DBBaseModel):
             CheckConstraint("code LIKE 'D%'", name="code_starts_with_d")
         ),
     )
+
+    @classmethod
+    def get_or_create_procedure(cls, session: Session, code: str):
+        procedure = session.query(Procedure).filter_by(code=code).first()
+        if procedure is None:
+            procedure = Procedure(code=code)
+            session.add(procedure)
+            session.commit()
+            session.refresh(procedure)
+        return procedure
