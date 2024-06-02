@@ -47,7 +47,8 @@ class Claim(DBBaseModel):
     def get_top_net_fees_claims(cls, session: Session):
         return (
             session.query(Claim)
-            .order_by(Claim.net_fee)
+            .distinct(Claim.provider_id)
+            .order_by(Claim.net_fee.desc())
             .limit(10)
             .all()
         )
