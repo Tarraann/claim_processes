@@ -13,6 +13,7 @@ from asgi_correlation_id import (
     correlation_id,
 )
 from database import Database
+from claims.controllers.claims import router as claims_router
 
 
 # Initialize FastAPI
@@ -35,6 +36,8 @@ engine_args = {
 
 app.add_middleware(DBSessionMiddleware, db_url=DB_URL, engine_args=engine_args)
 app.add_middleware(CorrelationIdMiddleware)
+
+app.include_router(claims_router, prefix="/api/claim")
 
 
 @app.exception_handler(Exception)
